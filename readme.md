@@ -21,3 +21,4 @@ new features
 - [ ] export/import
 - [ ] push card to the bottom
 - [ ] copy links to clipboard
+- [ ] paste url and focus on title editing area immediately
