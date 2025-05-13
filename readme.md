@@ -1,7 +1,7 @@
 bugs to be fixed
 
 - [x] cannot paste into certain lists
-- [ ] make the title 
+- [ ] make the title editable
 - [x] make the url editable
 - [ ] archived lists are not restored
 
