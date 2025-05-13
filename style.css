@@ -250,10 +250,10 @@ main {
 }
 
 .link-url {
-    position: absolute;
+    /* position: absolute;
     top: 10px;
     left: 10px;
-    right: 30px;
+    right: 30px; */
     font-size: 0.8rem;
     color: var(--color-text-secondary);
     background: transparent;
@@ -265,6 +265,7 @@ main {
     opacity: 0;
     transform: translateY(-20px);
     transition: opacity 0.3s ease, transform 0.3s ease;
+    overflow-wrap: anywhere;
 }
 
 .edit-mode .link-url {

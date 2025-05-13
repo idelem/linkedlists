@@ -189,7 +189,7 @@ function renderList(list) {
     });
     
     // Make items sortable within and between lists
-    setupDragAndDrop(listItems, list.id);
+    setupDragAndDrop(listElement, list.id);
     
     listElement.appendChild(listHeader);
     listElement.appendChild(listItems);
@@ -710,6 +710,7 @@ function setupDragAndDrop(container, listId) {
             // Reorder items within the same list
             updateItemOrder(listId);
         }
+        e.classList.remove('edit-mode');
     });
 }
 

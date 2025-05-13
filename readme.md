@@ -1,12 +1,13 @@
 bugs to be fixed
 
-- [ ] cannot paste into certain lists
+- [x] cannot paste into certain lists
 - [ ] make the title and link editable
 
 improvements
 
 - [ ] link and title spacing on editing
 - [ ] remove delete confirmation
+- [x] remove `.edit-mode` on dropping
 
 new features
 
