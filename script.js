@@ -169,7 +169,13 @@ function renderList(list) {
             const clipboardData = e.clipboardData || window.clipboardData;
             const pastedText = clipboardData.getData('text');
             
-            if (isValidURL(pastedText)) {
+            // Check if it's a Markdown link
+            const markdownLink = parseMarkdownLink(pastedText);
+            
+            if (markdownLink) {
+                e.preventDefault();
+                addLinkToList(list.id, markdownLink.url, markdownLink.title);
+            } else if (isValidURL(pastedText)) {
                 e.preventDefault();
                 addLinkToList(list.id, pastedText);
             }
@@ -319,30 +325,54 @@ function isValidURL(string) {
 }
 
 // Add a link to a list
-function addLinkToList(listId, url) {
+// Add a link to a list
+function addLinkToList(listId, url, title = null) {
     const listIndex = data.lists.findIndex(list => list.id === listId);
     if (listIndex !== -1) {
-        fetchPageTitle(url)
-            .then(title => {
-                const newItem = {
-                    id: generateId(),
-                    url: url,
-                    title: title || url,
-                    description: '',
-                    dateAdded: new Date().toISOString()
-                };
-                
-                data.lists[listIndex].items.push(newItem);
-                saveData();
-                
-                // Rerender just this list
-                const listElement = document.querySelector(`.list[data-id="${listId}"]`);
-                if (listElement) {
-                    const listItems = listElement.querySelector('.list-items');
-                    const itemElement = createItemElement(newItem, listId);
-                    listItems.appendChild(itemElement);
-                }
-            });
+        if (title) {
+            // If title is provided, use it directly
+            const newItem = {
+                id: generateId(),
+                url: url,
+                title: title,
+                description: '',
+                dateAdded: new Date().toISOString()
+            };
+            
+            data.lists[listIndex].items.push(newItem);
+            saveData();
+            
+            // Rerender just this list
+            const listElement = document.querySelector(`.list[data-id="${listId}"]`);
+            if (listElement) {
+                const listItems = listElement.querySelector('.list-items');
+                const itemElement = createItemElement(newItem, listId);
+                listItems.appendChild(itemElement);
+            }
+        } else {
+            // For plain URLs, fetch title as before
+            fetchPageTitle(url)
+                .then(fetchedTitle => {
+                    const newItem = {
+                        id: generateId(),
+                        url: url,
+                        title: fetchedTitle || url,
+                        description: '',
+                        dateAdded: new Date().toISOString()
+                    };
+                    
+                    data.lists[listIndex].items.push(newItem);
+                    saveData();
+                    
+                    // Rerender just this list
+                    const listElement = document.querySelector(`.list[data-id="${listId}"]`);
+                    if (listElement) {
+                        const listItems = listElement.querySelector('.list-items');
+                        const itemElement = createItemElement(newItem, listId);
+                        listItems.appendChild(itemElement);
+                    }
+                });
+        }
     }
 }
 
