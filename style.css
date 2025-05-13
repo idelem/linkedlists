@@ -44,14 +44,14 @@ body {
     /* padding: 20px; */
 }
 
-header {
+footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
     /* margin-bottom: 20px; */
     padding: 20px;
-    /* border-bottom: 1px solid var(--color-border); */
-    height: 80px;
+    border-top: 1px solid var(--color-border);
+    height: 60px;
 }
 
 h1 {
@@ -64,7 +64,7 @@ main {
     flex-grow: 1;
     overflow-x: auto;
     /* padding-bottom: 20px; */
-    max-height: calc(100vh - 80px);
+    max-height: calc(100vh - 60px);
     scrollbar-width: none;
 }
 
@@ -81,11 +81,12 @@ main {
     /* background-color: var(--bg-surface); */
     border: 1px solid var(--color-border);
     border-left: none;
+    border-bottom: none;
     /* border-radius: 4px; */
     display: flex;
     flex-direction: column;
-    height: calc(100vh - 80px);
-    max-height: calc(100vh - 80px);
+    height: calc(100vh - 60px);
+    max-height: calc(100vh - 60px);
     overflow-y: auto;
     scrollbar-width: none;
 }
@@ -204,7 +205,7 @@ main {
 
 .add-list-button {
     min-width: 20px;
-    height: calc(100vh - 80px); /* 40px */;
+    height: calc(100vh - 60px); /* 40px */;
     background-color: var(--bg-surface);
     color: var(--color-text-secondary);
     border: 1px solid var(--color-border);
