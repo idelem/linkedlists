@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔗</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+</head>
+<body class="light">
+    <header>
+        <!-- <h1>Link Manager</h1> -->
+        <div class="header-icons">
+            <button id="archive-button" title="View Archived Lists">
+                <i class="fas fa-archive"></i>
+            </button>
+            <button id="trash-button" title="View Deleted Items">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+    </header>
+
+    <main>
+        <div id="lists-container"></div>
+        <button id="add-list-button" class="add-list-button">
+            <i class="fas fa-plus"></i>
+        </button>
+    </main>
+
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h2 id="modal-title">Confirm Deletion</h2>
+            <p id="modal-message">Are you sure you want to delete this item?</p>
+            <div class="modal-buttons">
+                <button id="modal-cancel" class="modal-button">Cancel</button>
+                <button id="modal-confirm" class="modal-button confirm">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="archive-view" class="hidden">
+        <div class="view-header">
+            <h2>Archived Lists</h2>
+            <button id="archive-back" class="back-button">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+        </div>
+        <div id="archived-lists-container"></div>
+    </div>
+
+    <div id="trash-view" class="hidden">
+        <div class="view-header">
+            <h2>Deleted Items</h2>
+            <button id="trash-back" class="back-button">
+                <i class="fas fa-arrow-left"></i> Back
+            </button>
+        </div>
+        <div id="trash-list"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
