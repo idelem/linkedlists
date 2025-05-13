@@ -1,3 +1,5 @@
+![image](https://github.com/user-attachments/assets/27b2fc60-7c63-4244-90c3-87ddbc19666a)
+
 bugs to be fixed
 
 - [x] cannot paste into certain lists
