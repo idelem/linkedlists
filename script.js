@@ -204,14 +204,38 @@ function createItemElement(item, listId) {
     itemElement.dataset.id = item.id;
     itemElement.draggable = true;
     
+    // In the createItemElement function, modify the linkTitle section:
+
     const linkTitle = document.createElement('div');
     linkTitle.className = 'link-title';
-    
+
     const linkAnchor = document.createElement('a');
     linkAnchor.href = item.url;
     linkAnchor.textContent = item.title;
     linkAnchor.target = '_blank';
     linkAnchor.rel = 'noopener noreferrer';
+
+    // Save title when done editing
+    // For linkAnchor
+    linkAnchor.addEventListener('blur', (e) => {
+        const newTitle = e.target.textContent.trim();
+        if (newTitle) {
+            item.title = newTitle;
+            saveData();
+        } else {
+            e.target.textContent = item.title;
+        }
+        
+        linkAnchor.contentEditable = false;
+        
+        // Check if we should exit edit mode
+        setTimeout(() => {
+            if (document.activeElement !== linkUrl && 
+                document.activeElement !== linkDescription) {
+                itemElement.classList.remove('edit-mode');
+            }
+        }, 0);
+    });
     
     linkTitle.appendChild(linkAnchor);
     
@@ -229,7 +253,12 @@ function createItemElement(item, listId) {
             e.target.textContent = item.url;
         }
         
-        itemElement.classList.remove('edit-mode');
+        setTimeout(() => {
+            if (document.activeElement !== linkAnchor && 
+                document.activeElement !== linkDescription) {
+                itemElement.classList.remove('edit-mode');
+            }
+        }, 0);
     });
     linkUrl.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
@@ -261,9 +290,12 @@ function createItemElement(item, listId) {
         saveData();
         
         // If the URL field is not being edited, hide it
-        if (document.activeElement !== linkUrl) {
-            itemElement.classList.remove('edit-mode');
-        }
+        setTimeout(() => {
+            if (document.activeElement !== linkUrl && 
+                document.activeElement !== linkAnchor) {
+                itemElement.classList.remove('edit-mode');
+            }
+        }, 0);
     });
     
     const deleteButton = document.createElement('button');

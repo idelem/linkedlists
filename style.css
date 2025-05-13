@@ -266,9 +266,11 @@ main {
     transform: translateY(-20px);
     transition: opacity 0.3s ease, transform 0.3s ease;
     overflow-wrap: anywhere;
+    display: none;
 }
 
 .edit-mode .link-url {
+    display: block;
     opacity: 1;
     transform: translateY(0);
 }
