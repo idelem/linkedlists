@@ -438,17 +438,6 @@ async function fetchPageTitle(url) {
     }
 }
 
-// Confirm deletion of an item
-function confirmDeleteItem(itemId, listId) {
-    
-    modalConfirm.onclick = () => {
-        deleteItem(itemId, listId);
-        modal.style.display = 'none';
-    };
-    
-    modal.style.display = 'flex';
-}
-
 // Delete an item and move it to trash
 function deleteItem(itemId, listId) {
     const listIndex = data.lists.findIndex(list => list.id === listId);
