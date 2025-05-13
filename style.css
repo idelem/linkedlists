@@ -5,6 +5,7 @@
     --color-border-hover: #d0d0d0;
     --color-hover: #e8e8e8;
     --color-night: #f1f1f1;
+    --color-danger: #ae3029;
     --bg-main: #f8f7f6;
     --bg-surface: #f2f1f0;
     --bg-surface-hover: #e8e8e8;
@@ -199,8 +200,40 @@ main {
 }
 
 .delete-button:hover {
-    color: #e74c3c;
+    color: var(--color-danger);
     opacity: 1;
+}
+
+.delete-mode, .delete-mode:hover {
+    animation: wriggly 0.5s ease-in-out infinite;
+    transform-origin: center;
+    /* Add some subtle visual cues */
+    box-shadow: 0 0 5px rgba(209, 77, 65, 0.3);
+    border-left: 3px solid var(--color-danger) !important;
+}
+
+@keyframes wriggly {
+  0% {
+    transform: rotate(0deg) translateX(0);
+  }
+  15% {
+    transform: rotate(-1deg) translateX(-2px);
+  }
+  30% {
+    transform: rotate(1deg) translateX(2px);
+  }
+  45% {
+    transform: rotate(-1deg) translateX(-1px);
+  }
+  60% {
+    transform: rotate(1deg) translateX(1px);
+  }
+  75% {
+    transform: rotate(-0.5deg) translateX(-0.5px);
+  }
+  100% {
+    transform: rotate(0deg) translateX(0);
+  }
 }
 
 .add-list-button {

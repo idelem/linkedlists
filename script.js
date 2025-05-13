@@ -9,11 +9,6 @@ let data = {
 // DOM elements
 const listsContainer = document.getElementById('lists-container');
 const addListButton = document.getElementById('add-list-button');
-const modal = document.getElementById('modal');
-const modalTitle = document.getElementById('modal-title');
-const modalMessage = document.getElementById('modal-message');
-const modalCancel = document.getElementById('modal-cancel');
-const modalConfirm = document.getElementById('modal-confirm');
 const trashButton = document.getElementById('trash-button');
 const archiveButton = document.getElementById('archive-button');
 const archiveView = document.getElementById('archive-view');
@@ -58,18 +53,7 @@ function generateId() {
 
 // Set up event listeners
 function setupEventListeners() {
-    addListButton.addEventListener('click', createNewList);
-    
-    modalCancel.addEventListener('click', () => {
-        modal.style.display = 'none';
-    });
-    
-    window.addEventListener('click', (e) => {
-        if (e.target === modal) {
-            modal.style.display = 'none';
-        }
-    });
-    
+    addListButton.addEventListener('click', createNewList); 
     trashButton.addEventListener('click', showTrashView);
     archiveButton.addEventListener('click', showArchiveView);
     archiveBack.addEventListener('click', showMainView);
@@ -299,9 +283,22 @@ function createItemElement(item, listId) {
     });
     
     const deleteButton = document.createElement('button');
+    let deleteMode = false;
     deleteButton.className = 'delete-button';
     deleteButton.innerHTML = '<i class="fas fa-times"></i>';
-    deleteButton.addEventListener('click', () => confirmDeleteItem(item.id, listId));
+    deleteButton.addEventListener('click', () => {
+        if (!deleteMode) {
+            deleteMode = true;
+            itemElement.classList.add('delete-mode');
+        }
+        else {
+            deleteItem(item.id, listId);
+        }
+    });
+    deleteButton.addEventListener('blur', () => {
+        deleteMode = false;
+        itemElement.classList.remove('delete-mode');
+    });
     
     itemElement.appendChild(linkTitle);
     itemElement.appendChild(linkUrl);

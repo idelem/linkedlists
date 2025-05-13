@@ -8,7 +8,7 @@ bugs to be fixed
 improvements
 
 - [x] link and title spacing on editing
-- [ ] remove delete confirmation
+- [x] remove delete confirmation
 - [x] remove `.edit-mode` on dropping
 - [ ] make add list button sticky, and scroll to the right most on clicking
 
