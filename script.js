@@ -443,8 +443,6 @@ async function fetchPageTitle(url) {
 
 // Confirm deletion of an item
 function confirmDeleteItem(itemId, listId) {
-    modalTitle.textContent = 'Confirm Deletion';
-    modalMessage.textContent = 'Are you sure you want to delete this item?';
     
     modalConfirm.onclick = () => {
         deleteItem(itemId, listId);

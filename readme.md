@@ -3,6 +3,7 @@ bugs to be fixed
 - [x] cannot paste into certain lists
 - [ ] make the title 
 - [x] make the url editable
+- [ ] archived lists are not restored
 
 improvements
 
