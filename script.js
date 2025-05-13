@@ -165,21 +165,27 @@ function renderList(list) {
     
     // Add paste event listener to capture URLs
     listElement.addEventListener('paste', (e) => {
-        if (e.target.classList.contains('list-items') || e.target.closest('.list-items') === listItems) {
+            console.log('Processing paste');
+        // if (e.target.classList.contains('list-items') || e.target.closest('.list-items') === listItems) {
             const clipboardData = e.clipboardData || window.clipboardData;
             const pastedText = clipboardData.getData('text');
+            console.log('Processing paste:', pastedText);
             
             // Check if it's a Markdown link
             const markdownLink = parseMarkdownLink(pastedText);
             
             if (markdownLink) {
                 e.preventDefault();
+                console.log('Detected Markdown link:', markdownLink);
                 addLinkToList(list.id, markdownLink.url, markdownLink.title);
             } else if (isValidURL(pastedText)) {
                 e.preventDefault();
+                console.log('Detected URL:', pastedText);
                 addLinkToList(list.id, pastedText);
+            } else {
+                console.log('Not recognized as URL or Markdown link');
             }
-        }
+        // }
     });
     
     // Make items sortable within and between lists
@@ -316,11 +322,23 @@ function archiveList(listId) {
 
 // Check if a string is a valid URL
 function isValidURL(string) {
+    // Simple check if string starts with http:// or https://
+    if (string.startsWith('http://') || string.startsWith('https://')) {
+        return true;
+    }
+    
+    // More comprehensive validation using URL constructor
     try {
         new URL(string);
         return true;
     } catch (_) {
-        return false;
+        // Try with added https://
+        try {
+            new URL('https://' + string);
+            return true;
+        } catch (_) {
+            return false;
+        }
     }
 }
 
@@ -755,10 +773,11 @@ function getDragAfterElement(container, y) {
 
 // Parse Markdown link format [title](url)
 function parseMarkdownLink(text) {
-    const mdLinkRegex = /\[([^\]]+)\]\(([^)]+)\)/;
+    // More precise regex for Markdown links
+    const mdLinkRegex = /^\s*\[([^\]]+)\]\(([^)]+)\)\s*$/;
     const match = text.match(mdLinkRegex);
     
-    if (match) {
+    if (match && match[2].trim()) {
         return {
             title: match[1].trim(),
             url: match[2].trim()

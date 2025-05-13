@@ -14,3 +14,4 @@ new features
 - [ ] other types of notes
 - [ ] export/import
 - [ ] push card to the bottom
+- [ ] copy links to clipboard
