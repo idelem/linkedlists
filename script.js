@@ -980,50 +980,78 @@ function exitSearchMode() {
 }
 
 function highlightMatches(element, searchTerm) {
-    // We need to be careful with what elements we highlight
-    // For link titles, we should highlight the anchor text
-    const elementsToHighlight = [];
+    // Remove all highlights recursively
+    function removeHighlights(node) {
+        if (node.nodeType === Node.ELEMENT_NODE) {
+            if (node.classList.contains('search-highlight')) {
+                const text = document.createTextNode(node.textContent);
+                node.parentNode.replaceChild(text, node);
+                return;
+            }
+            Array.from(node.childNodes).forEach(removeHighlights);
+        }
+    }
 
+    // Highlight text nodes, skipping <br>
+    function highlightTextNode(node, regex) {
+        if (node.nodeType === Node.TEXT_NODE && node.data.trim() !== '') {
+            const text = node.data;
+            const matches = text.match(regex);
+            
+            if (!matches) return; // No matches found in this text node
+            
+            const frag = document.createDocumentFragment();
+            let lastIndex = 0;
+            
+            text.replace(regex, (match, offset) => {
+                // Add text before match
+                if (offset > lastIndex) {
+                    frag.appendChild(
+                        document.createTextNode(text.slice(lastIndex, offset))
+                    );
+                }
+                
+                // Add highlighted match
+                const span = document.createElement('span');
+                span.className = 'search-highlight';
+                span.textContent = match;
+                frag.appendChild(span);
+                
+                lastIndex = offset + match.length;
+            });
+            
+            // Add remaining text after last match
+            if (lastIndex < text.length) {
+                frag.appendChild(
+                    document.createTextNode(text.slice(lastIndex))
+                );
+            }
+            
+            node.parentNode.replaceChild(frag, node);
+        } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName !== 'BR') {
+            Array.from(node.childNodes).forEach(child => highlightTextNode(child, regex));
+        }
+    }
+
+    // Decide which elements to highlight
+    const elementsToHighlight = [];
     if (element.classList.contains('list-title')) {
         elementsToHighlight.push(element);
     } else if (element.classList.contains('list-item')) {
-        // Find the item's title, description, and URL elements
         const titleAnchor = element.querySelector('.link-title a');
         const description = element.querySelector('.link-description');
         const url = element.querySelector('.link-url');
-
         if (titleAnchor) elementsToHighlight.push(titleAnchor);
         if (description && description.textContent !== 'Add a description...') elementsToHighlight.push(description);
         if (url) elementsToHighlight.push(url);
     }
 
-    // Remove previous highlights before applying new ones
     elementsToHighlight.forEach(el => {
-        // Replace all search-highlight spans with their text content
-        const removeHighlights = (node) => {
-            if (node.nodeType === Node.ELEMENT_NODE) {
-                if (node.classList.contains('search-highlight')) {
-                    const text = document.createTextNode(node.textContent);
-                    node.parentNode.replaceChild(text, node);
-                    return;
-                }
-                // Recursively process child nodes
-                Array.from(node.childNodes).forEach(removeHighlights);
-            }
-        };
         removeHighlights(el);
-
-        // Now apply new highlights
-        const text = el.textContent;
-        if (!searchTerm) {
-            el.innerHTML = text;
-            return;
-        }
-        const regex = new RegExp(searchTerm, 'gi');
-        const highlightedText = text.replace(regex, match => `<span class="search-highlight">${match}</span>`);
-        if (text !== highlightedText) {
-            el.innerHTML = highlightedText;
-        }
+        if (!searchTerm) return;
+        const safeTerm = searchTerm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(safeTerm, 'gi');
+        highlightTextNode(el, regex);
     });
 }
 
