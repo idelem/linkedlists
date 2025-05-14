@@ -17,12 +17,14 @@ const archiveBack = document.getElementById('archive-back');
 const trashBack = document.getElementById('trash-back');
 const archivedListsContainer = document.getElementById('archived-lists-container');
 const trashList = document.getElementById('trash-list');
+const searchBar = document.getElementById('search-bar');
 
 // Initialize the application
 function init() {
     loadData();
     renderLists();
     setupEventListeners();
+    setupSearchFunctionality();
 }
 
 // Save data to localStorage
@@ -58,6 +60,24 @@ function setupEventListeners() {
     archiveButton.addEventListener('click', showArchiveView);
     archiveBack.addEventListener('click', showMainView);
     trashBack.addEventListener('click', showMainView);
+}
+
+function setupSearchFunctionality() {
+    searchBar.addEventListener('input', performSearch);
+    searchBar.addEventListener('focusout', exitSearchMode);
+    searchBar.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            exitSearchMode();
+        }
+    });
+
+    // Add keyboard shortcut (Ctrl+/)
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+            e.preventDefault();
+            searchBar.focus();
+        }
+    });
 }
 
 // Create a new list
@@ -848,6 +868,124 @@ function parseMarkdownLink(text) {
     }
     
     return null;
+}
+
+function performSearch(e) {
+    const searchTerm = e.target.value.toLowerCase().trim();
+    
+    if (!searchTerm) {
+        exitSearchMode();
+        return;
+    }
+    
+    // Set search mode
+    document.body.classList.add('search-mode');
+    
+    // Loop through all lists and items
+    data.lists.forEach(list => {
+        const listElement = document.querySelector(`.list[data-id="${list.id}"]`);
+        let hasMatchingItems = false;
+        
+        if (listElement) {
+            // Check if list name matches search term
+            const listMatches = list.name.toLowerCase().includes(searchTerm);
+            
+            // Check each item in the list
+            list.items.forEach(item => {
+                const itemElement = listElement.querySelector(`.list-item[data-id="${item.id}"]`);
+                if (itemElement) {
+                    const titleMatches = item.title.toLowerCase().includes(searchTerm);
+                    const descriptionMatches = item.description && item.description.toLowerCase().includes(searchTerm);
+                    const urlMatches = item.url.toLowerCase().includes(searchTerm);
+                    
+                    if (titleMatches || descriptionMatches || urlMatches) {
+                        itemElement.classList.remove('hidden');
+                        hasMatchingItems = true;
+                        
+                        // Highlight matching text (optional)
+                        highlightMatches(itemElement, searchTerm);
+                    } else {
+                        itemElement.classList.add('hidden');
+                    }
+                }
+            });
+            
+            // Show/hide the list based on if it or any of its items match
+            if (listMatches || hasMatchingItems) {
+                listElement.classList.remove('hidden');
+                
+                // If the list is collapsed but has matching items, expand it
+                if (list.collapsed && hasMatchingItems) {
+                    // Temporarily expand for search results
+                    listElement.classList.remove('list-collapsed');
+                    listElement.dataset.wasCollapsed = "true";
+                }
+                
+                // If list name matches, highlight it
+                if (listMatches) {
+                    const listTitle = listElement.querySelector('.list-title');
+                    if (listTitle) {
+                        highlightMatches(listTitle, searchTerm);
+                    }
+                }
+            } else {
+                listElement.classList.add('hidden');
+            }
+        }
+    });
+}
+
+function exitSearchMode() {
+    searchBar.value = '';
+    document.body.classList.remove('search-mode');
+    
+    // Show all lists and items
+    document.querySelectorAll('.list, .list-item').forEach(el => {
+        el.classList.remove('hidden');
+    });
+    
+    // Remove any highlighting
+    document.querySelectorAll('.search-highlight').forEach(el => {
+        const parent = el.parentNode;
+        parent.textContent = parent.textContent; // Remove highlighting by resetting text
+    });
+    
+    // Restore collapsed state for lists that were temporarily expanded
+    document.querySelectorAll('.list[data-wasCollapsed="true"]').forEach(listEl => {
+        listEl.classList.add('list-collapsed');
+        listEl.removeAttribute('data-wasCollapsed');
+    });
+}
+
+function highlightMatches(element, searchTerm) {
+    // We need to be careful with what elements we highlight
+    // For link titles, we should highlight the anchor text
+    const elementsToHighlight = [];
+    
+    if (element.classList.contains('list-title')) {
+        elementsToHighlight.push(element);
+    } else if (element.classList.contains('list-item')) {
+        // Find the item's title, description, and URL elements
+        const titleAnchor = element.querySelector('.link-title a');
+        const description = element.querySelector('.link-description');
+        const url = element.querySelector('.link-url');
+        
+        if (titleAnchor) elementsToHighlight.push(titleAnchor);
+        if (description && description.textContent !== 'Add a description...') elementsToHighlight.push(description);
+        if (url) elementsToHighlight.push(url);
+    }
+    
+    // Apply highlighting to the found elements
+    elementsToHighlight.forEach(el => {
+        const text = el.textContent;
+        const regex = new RegExp(searchTerm, 'gi');
+        const highlightedText = text.replace(regex, match => `<span class="search-highlight">${match}</span>`);
+        
+        // Only update if there are matches
+        if (text !== highlightedText) {
+            el.innerHTML = highlightedText;
+        }
+    });
 }
 
 // Initialize the application

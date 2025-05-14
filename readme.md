@@ -14,13 +14,17 @@ improvements
 - [x] remove `.edit-mode` on dropping
 - [ ] make add list button sticky, and scroll to the right most on clicking
 - [x] should be able to click anywhere on the text and edit there
+- [ ] do not highlight url in search results
 
 new features
 
-- [ ] **fulltext search**
+- [x] **fulltext search**
 - [ ] other types of cards
-    - [ ] **note type**
+    - [ ] **note**
+    - [ ] todo
+    - [ ] image
 - [ ] export/import
+- [ ] publish
 - [ ] push card to the bottom
 - [ ] copy links to clipboard
 - [ ] paste plain url and focus on title editing area immediately to edit it
