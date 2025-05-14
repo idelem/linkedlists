@@ -872,24 +872,32 @@ function parseMarkdownLink(text) {
 
 function performSearch(e) {
     const searchTerm = e.target.value.toLowerCase().trim();
-    
+
     if (!searchTerm) {
         exitSearchMode();
         return;
     }
-    
+
     // Set search mode
     document.body.classList.add('search-mode');
-    
+
+    // Always clear highlights from all list titles first (before the loop)
+    document.querySelectorAll('.list-title').forEach(titleEl => {
+        highlightMatches(titleEl, ""); // Clear highlights
+    });
+
+    // Track which list titles should be highlighted
+    const listTitlesToHighlight = [];
+
     // Loop through all lists and items
     data.lists.forEach(list => {
         const listElement = document.querySelector(`.list[data-id="${list.id}"]`);
         let hasMatchingItems = false;
-        
+
         if (listElement) {
             // Check if list name matches search term
             const listMatches = list.name.toLowerCase().includes(searchTerm);
-            
+
             // Check each item in the list
             list.items.forEach(item => {
                 const itemElement = listElement.querySelector(`.list-item[data-id="${item.id}"]`);
@@ -897,11 +905,11 @@ function performSearch(e) {
                     const titleMatches = item.title.toLowerCase().includes(searchTerm);
                     const descriptionMatches = item.description && item.description.toLowerCase().includes(searchTerm);
                     const urlMatches = item.url.toLowerCase().includes(searchTerm);
-                    
+
                     if (titleMatches || descriptionMatches || urlMatches) {
                         itemElement.classList.remove('hidden');
                         hasMatchingItems = true;
-                        
+
                         // Highlight matching text (optional)
                         highlightMatches(itemElement, searchTerm);
                     } else {
@@ -909,29 +917,34 @@ function performSearch(e) {
                     }
                 }
             });
-            
+
             // Show/hide the list based on if it or any of its items match
             if (listMatches || hasMatchingItems) {
                 listElement.classList.remove('hidden');
-                
+
                 // If the list is collapsed but has matching items, expand it
                 if (list.collapsed && hasMatchingItems) {
                     // Temporarily expand for search results
                     listElement.classList.remove('list-collapsed');
                     listElement.dataset.wasCollapsed = "true";
                 }
-                
-                // If list name matches, highlight it
+
+                // Collect list titles to highlight after the loop
                 if (listMatches) {
                     const listTitle = listElement.querySelector('.list-title');
                     if (listTitle) {
-                        highlightMatches(listTitle, searchTerm);
+                        listTitlesToHighlight.push(listTitle);
                     }
                 }
             } else {
                 listElement.classList.add('hidden');
             }
         }
+    });
+
+    // Highlight only matching list titles (after the loop)
+    listTitlesToHighlight.forEach(listTitle => {
+        highlightMatches(listTitle, searchTerm);
     });
 }
 
@@ -943,13 +956,14 @@ function exitSearchMode() {
     document.querySelectorAll('.list, .list-item').forEach(el => {
         el.classList.remove('hidden');
     });
-    
+
     // Remove any highlighting
-    document.querySelectorAll('.search-highlight').forEach(el => {
-        const parent = el.parentNode;
-        parent.textContent = parent.textContent; // Remove highlighting by resetting text
+    document.querySelectorAll('.search-highlight').forEach(span => {
+        const parent = span.parentNode;
+        parent.replaceChild(document.createTextNode(span.textContent), span);
+        parent.normalize(); // Merge adjacent text nodes
     });
-    
+
     // Restore collapsed state for lists that were temporarily expanded
     document.querySelectorAll('.list[data-wasCollapsed="true"]').forEach(listEl => {
         listEl.classList.add('list-collapsed');
@@ -961,7 +975,7 @@ function highlightMatches(element, searchTerm) {
     // We need to be careful with what elements we highlight
     // For link titles, we should highlight the anchor text
     const elementsToHighlight = [];
-    
+
     if (element.classList.contains('list-title')) {
         elementsToHighlight.push(element);
     } else if (element.classList.contains('list-item')) {
@@ -969,19 +983,36 @@ function highlightMatches(element, searchTerm) {
         const titleAnchor = element.querySelector('.link-title a');
         const description = element.querySelector('.link-description');
         const url = element.querySelector('.link-url');
-        
+
         if (titleAnchor) elementsToHighlight.push(titleAnchor);
         if (description && description.textContent !== 'Add a description...') elementsToHighlight.push(description);
         if (url) elementsToHighlight.push(url);
     }
-    
-    // Apply highlighting to the found elements
+
+    // Remove previous highlights before applying new ones
     elementsToHighlight.forEach(el => {
+        // Replace all search-highlight spans with their text content
+        const removeHighlights = (node) => {
+            if (node.nodeType === Node.ELEMENT_NODE) {
+                if (node.classList.contains('search-highlight')) {
+                    const text = document.createTextNode(node.textContent);
+                    node.parentNode.replaceChild(text, node);
+                    return;
+                }
+                // Recursively process child nodes
+                Array.from(node.childNodes).forEach(removeHighlights);
+            }
+        };
+        removeHighlights(el);
+
+        // Now apply new highlights
         const text = el.textContent;
+        if (!searchTerm) {
+            el.innerHTML = text;
+            return;
+        }
         const regex = new RegExp(searchTerm, 'gi');
         const highlightedText = text.replace(regex, match => `<span class="search-highlight">${match}</span>`);
-        
-        // Only update if there are matches
         if (text !== highlightedText) {
             el.innerHTML = highlightedText;
         }
