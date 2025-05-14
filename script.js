@@ -318,7 +318,11 @@ function createItemElement(item, listId) {
     
     const linkDescription = document.createElement('div');
     linkDescription.className = 'link-description';
-    linkDescription.textContent = item.description || 'Add a description...';
+    linkDescription.innerHTML = (item.description && item.description !== 'Add a description...')
+        ? item.description
+            .replace(/\n\n/g, '<br>&nbsp;<br>') // handle double line breaks first
+            .replace(/\n/g, '<br>')             // then single line breaks
+        : 'Add a description...';
     linkDescription.contentEditable = true;
     linkDescription.addEventListener('click', () => {
         if (linkDescription.textContent === 'Add a description...') {
@@ -336,7 +340,13 @@ function createItemElement(item, listId) {
     });
 
     linkDescription.addEventListener('blur', (e) => {
-        const newDescription = e.target.textContent.trim();
+        // Replace <div> and <br> with \n, then strip HTML tags
+        let html = e.target.innerHTML;
+        html = html.replace(/<div><br><\/div>/g, '\n')
+                .replace(/<div>/g, '\n')
+                .replace(/<br>/g, '\n')
+                .replace(/<\/div>/g, '');
+        const newDescription = html.trim();
         if (newDescription && newDescription !== 'Add a description...') {
             item.description = newDescription;
         } else {
@@ -344,12 +354,10 @@ function createItemElement(item, listId) {
             e.target.textContent = 'Add a description...';
         }
         saveData();
-        
-        // If the URL field is not being edited, hide it
+
         setTimeout(() => {
             if (document.activeElement !== linkUrl && 
                 document.activeElement !== titleEditor) {
-                // itemElement.classList.remove('edit-mode');
                 exitEditMode();
             }
         }, 0);

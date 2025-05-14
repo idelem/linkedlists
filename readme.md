@@ -6,7 +6,7 @@ bugs to be fixed
 - [x] make the title editable
 - [x] make the url editable
 - [ ] archived/deleted things are not restored
-- [ ] searching breaks linebreaks in description
+- [x] linebreaks are not saved
 
 improvements
 
@@ -20,7 +20,7 @@ improvements
 new features
 
 - [x] **fulltext search**
-- [ ] other types of cards
+- [/] other types of cards
     - [ ] **note**
     - [ ] todo
     - [ ] image
