@@ -7,6 +7,7 @@ bugs to be fixed
 - [x] make the url editable
 - [ ] archived/deleted things are not restored
 - [x] linebreaks are not saved
+- [ ] highlighting doesn't work for strings more than 1 char long
 
 improvements
 
