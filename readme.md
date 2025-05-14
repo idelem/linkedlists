@@ -5,7 +5,8 @@ bugs to be fixed
 - [x] cannot paste into certain lists
 - [x] make the title editable
 - [x] make the url editable
-- [ ] archived lists are not restored
+- [ ] archived/deleted things are not restored
+- [ ] searching breaks linebreaks in description
 
 improvements
 
