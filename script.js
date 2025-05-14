@@ -64,7 +64,7 @@ function setupEventListeners() {
 
 function setupSearchFunctionality() {
     searchBar.addEventListener('input', performSearch);
-    searchBar.addEventListener('focusout', exitSearchMode);
+    // searchBar.addEventListener('focusout', exitSearchMode);
     searchBar.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             exitSearchMode();
