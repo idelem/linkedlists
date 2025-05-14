@@ -251,6 +251,8 @@ function createItemElement(item, listId) {
         itemElement.classList.add('edit-mode');
         linkAnchor.style.display = 'none';
         titleEditor.style.display = 'block';
+        itemElement.draggable = false;
+        e.stopPropagation();
     }
 
     // Function to exit edit mode
@@ -258,6 +260,7 @@ function createItemElement(item, listId) {
         itemElement.classList.remove('edit-mode');
         linkAnchor.style.display = 'block';
         titleEditor.style.display = 'none';
+        itemElement.draggable = true;
     }
     
     const linkUrl = document.createElement('div');
@@ -281,6 +284,11 @@ function createItemElement(item, listId) {
             }
         }, 0);
     });
+
+    linkUrl.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+
     linkUrl.addEventListener('keydown', (e) => {
         if (e.key === 'Enter') {
             e.preventDefault();
@@ -292,7 +300,7 @@ function createItemElement(item, listId) {
     linkDescription.className = 'link-description';
     linkDescription.textContent = item.description || 'Add a description...';
     linkDescription.contentEditable = true;
-    linkDescription.addEventListener('focus', () => {
+    linkDescription.addEventListener('click', () => {
         if (linkDescription.textContent === 'Add a description...') {
             linkDescription.textContent = '';
         }
@@ -301,6 +309,12 @@ function createItemElement(item, listId) {
         // itemElement.classList.add('edit-mode');
         enterEditMode();
     });
+
+    linkDescription.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    });
+
     linkDescription.addEventListener('blur', (e) => {
         const newDescription = e.target.textContent.trim();
         if (newDescription && newDescription !== 'Add a description...') {
@@ -343,13 +357,6 @@ function createItemElement(item, listId) {
     itemElement.appendChild(linkUrl);
     itemElement.appendChild(linkDescription);
     itemElement.appendChild(deleteButton);
-    
-    // Double click on title to edit
-    linkTitle.addEventListener('dblclick', () => {
-        itemElement.classList.add('edit-mode');
-        linkUrl.focus();
-        selectElementContents(linkUrl);
-    });
     
     // Setup drag events
     itemElement.addEventListener('dragstart', (e) => {

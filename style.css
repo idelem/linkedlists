@@ -490,6 +490,10 @@ main {
     cursor: move;
 }
 
+.draggable.edit-mode {
+    cursor: text;
+}
+
 .dragging {
     opacity: 0.5;
     border: 1px dashed var(--color-border-hover) !important;
