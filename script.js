@@ -454,6 +454,7 @@ function addLinkToList(listId, url, title = null) {
             // If title is provided, use it directly
             const newItem = {
                 id: generateId(),
+                type: 'link',
                 url: url,
                 title: title,
                 description: '',
@@ -510,6 +511,30 @@ async function fetchPageTitle(url) {
         console.error('Error fetching page title:', error);
         return url;
     }
+}
+
+function addNoteToList(listId, title = 'New Note', content = '') {
+  const listIndex = data.lists.findIndex(list => list.id === listId);
+  if (listIndex !== -1) {
+    const newItem = {
+      id: generateId(),
+      type: 'note',
+      title: title,
+      content: content,
+      dateAdded: new Date().toISOString()
+    };
+    
+    data.lists[listIndex].items.push(newItem);
+    saveData();
+    
+    // Rerender just this list
+    const listElement = document.querySelector(`.list[data-id="${listId}"]`);
+    if (listElement) {
+      const listItems = listElement.querySelector('.list-items');
+      const itemElement = createItemElement(newItem, listId);
+      listItems.appendChild(itemElement);
+    }
+  }
 }
 
 // Delete an item and move it to trash
