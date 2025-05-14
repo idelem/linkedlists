@@ -199,29 +199,66 @@ function createItemElement(item, listId) {
     linkAnchor.target = '_blank';
     linkAnchor.rel = 'noopener noreferrer';
 
+    const titleEditor = document.createElement('div');
+    titleEditor.className = 'title-editor';
+    titleEditor.contentEditable = true;
+    titleEditor.textContent = item.title;
+    titleEditor.style.display = 'none'; // Hide initially
+
+    // Add click handler to prevent opening URL when in edit mode
+    linkAnchor.addEventListener('click', (e) => {
+        if (itemElement.classList.contains('edit-mode')) {
+            e.preventDefault();
+            linkAnchor.contentEditable = true;
+            linkAnchor.focus();
+            selectElementContents(linkAnchor);
+        }
+    });
+
     // Save title when done editing
-    // For linkAnchor
-    linkAnchor.addEventListener('blur', (e) => {
+    titleEditor.addEventListener('blur', (e) => {
         const newTitle = e.target.textContent.trim();
         if (newTitle) {
             item.title = newTitle;
+            linkAnchor.textContent = newTitle;
             saveData();
         } else {
             e.target.textContent = item.title;
         }
         
-        linkAnchor.contentEditable = false;
-        
         // Check if we should exit edit mode
         setTimeout(() => {
             if (document.activeElement !== linkUrl && 
                 document.activeElement !== linkDescription) {
-                itemElement.classList.remove('edit-mode');
+                exitEditMode();
             }
         }, 0);
     });
+
+    titleEditor.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            e.target.blur();
+        }
+    });
+
     
     linkTitle.appendChild(linkAnchor);
+    linkTitle.appendChild(titleEditor);
+
+    // Function to enter edit mode
+    function enterEditMode() {
+        itemElement.classList.add('edit-mode');
+        linkAnchor.style.display = 'none';
+        titleEditor.style.display = 'block';
+    }
+
+    // Function to exit edit mode
+    function exitEditMode() {
+        itemElement.classList.remove('edit-mode');
+        linkAnchor.style.display = 'block';
+        titleEditor.style.display = 'none';
+    }
     
     const linkUrl = document.createElement('div');
     linkUrl.className = 'link-url';
@@ -238,7 +275,7 @@ function createItemElement(item, listId) {
         }
         
         setTimeout(() => {
-            if (document.activeElement !== linkAnchor && 
+            if (document.activeElement !== titleEditor && 
                 document.activeElement !== linkDescription) {
                 itemElement.classList.remove('edit-mode');
             }
@@ -261,7 +298,8 @@ function createItemElement(item, listId) {
         }
         
         // Show URL field when editing description
-        itemElement.classList.add('edit-mode');
+        // itemElement.classList.add('edit-mode');
+        enterEditMode();
     });
     linkDescription.addEventListener('blur', (e) => {
         const newDescription = e.target.textContent.trim();
@@ -276,8 +314,9 @@ function createItemElement(item, listId) {
         // If the URL field is not being edited, hide it
         setTimeout(() => {
             if (document.activeElement !== linkUrl && 
-                document.activeElement !== linkAnchor) {
-                itemElement.classList.remove('edit-mode');
+                document.activeElement !== titleEditor) {
+                // itemElement.classList.remove('edit-mode');
+                exitEditMode();
             }
         }, 0);
     });

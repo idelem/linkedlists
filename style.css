@@ -309,6 +309,12 @@ main {
     transform: translateY(0);
 }
 
+.title-editor {
+    font-weight: bold;
+    outline: none;
+    min-height: 1.2em;
+}
+
 /* Modal styling */
 .modal {
     display: none;
