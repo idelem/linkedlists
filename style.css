@@ -217,19 +217,19 @@ main {
     transform: rotate(0deg) translateX(0);
   }
   15% {
-    transform: rotate(-1deg) translateX(-2px);
+    transform: rotate(-0.5deg) translateX(-2px);
   }
   30% {
-    transform: rotate(1deg) translateX(2px);
+    transform: rotate(0.5deg) translateX(2px);
   }
   45% {
-    transform: rotate(-1deg) translateX(-1px);
+    transform: rotate(-0.5deg) translateX(-1px);
   }
   60% {
-    transform: rotate(1deg) translateX(1px);
+    transform: rotate(0.5deg) translateX(1px);
   }
   75% {
-    transform: rotate(-0.5deg) translateX(-0.5px);
+    transform: rotate(-0.25deg) translateX(-0.5px);
   }
   100% {
     transform: rotate(0deg) translateX(0);

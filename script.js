@@ -176,27 +176,30 @@ function renderList(list) {
     
     // Add paste event listener to capture URLs
     listElement.addEventListener('paste', (e) => {
-            console.log('Processing paste');
-        // if (e.target.classList.contains('list-items') || e.target.closest('.list-items') === listItems) {
-            const clipboardData = e.clipboardData || window.clipboardData;
-            const pastedText = clipboardData.getData('text');
-            console.log('Processing paste:', pastedText);
+        if (document.activeElement.isContentEditable) return;
+        const clipboardData = e.clipboardData || window.clipboardData;
+        const pastedText = clipboardData.getData('text');
+        
+        // Check if it's a Markdown link
+        const markdownLink = parseMarkdownLink(pastedText);
+        
+        if (markdownLink) {
+            e.preventDefault();
+            addLinkToList(list.id, markdownLink.url, markdownLink.title);
+        } else if (isValidURL(pastedText)) {
+            e.preventDefault();
+            addLinkToList(list.id, pastedText);
+        } else if (pastedText.trim().length > 0) {
+            // If it's not a URL but has content, create a note
+            e.preventDefault();
             
-            // Check if it's a Markdown link
-            const markdownLink = parseMarkdownLink(pastedText);
+            // Simple heuristic: first line becomes title, rest becomes content
+            // const lines = pastedText.trim().split('\n');
+            const title = ''; //lines[0].trim();
+            const content = pastedText.trim();//lines.slice(1).join('\n').trim();
             
-            if (markdownLink) {
-                e.preventDefault();
-                console.log('Detected Markdown link:', markdownLink);
-                addLinkToList(list.id, markdownLink.url, markdownLink.title);
-            } else if (isValidURL(pastedText)) {
-                e.preventDefault();
-                console.log('Detected URL:', pastedText);
-                addLinkToList(list.id, pastedText);
-            } else {
-                console.log('Not recognized as URL or Markdown link');
-            }
-        // }
+            addNoteToList(list.id, title, content);
+        }
     });
     
     // Make items sortable within and between lists
@@ -223,8 +226,18 @@ function createItemElement(item, listId) {
         createLinkItemContent(item, itemElement, listId);
     }
     
-
+    // Setup drag events
+    itemElement.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', JSON.stringify({
+            itemId: item.id,
+            listId: listId
+        }));
+        itemElement.classList.add('dragging');
+    });
     
+    itemElement.addEventListener('dragend', () => {
+        itemElement.classList.remove('dragging');
+    });
     
     return itemElement;
 }
@@ -405,19 +418,6 @@ function createLinkItemContent(item, itemElement, listId) {
     itemElement.appendChild(linkUrl);
     itemElement.appendChild(linkDescription);
     itemElement.appendChild(deleteButton);
-    
-    // Setup drag events
-    itemElement.addEventListener('dragstart', (e) => {
-        e.dataTransfer.setData('text/plain', JSON.stringify({
-            itemId: item.id,
-            listId: listId
-        }));
-        itemElement.classList.add('dragging');
-    });
-    
-    itemElement.addEventListener('dragend', () => {
-        itemElement.classList.remove('dragging');
-    });
 }
 
 function createNoteItemContent(item, itemElement, listId) {
@@ -434,10 +434,10 @@ function createNoteItemContent(item, itemElement, listId) {
     titleEditor.addEventListener('blur', (e) => {
         const newTitle = e.target.textContent.trim();
         if (newTitle) {
-        item.title = newTitle;
-        saveData();
+            item.title = newTitle;
+            saveData();
         } else {
-        e.target.textContent = item.title;
+            e.target.textContent = item.title;
         }
     });
     
@@ -465,10 +465,10 @@ function createNoteItemContent(item, itemElement, listId) {
     noteContent.addEventListener('blur', (e) => {
         const newContent = e.target.textContent.trim();
         if (newContent && newContent !== 'Add note content...') {
-        item.content = newContent;
+            item.content = newContent;
         } else {
         item.content = '';
-        e.target.textContent = 'Add note content...';
+            e.target.textContent = 'Add note content...';
         }
         saveData();
     });
@@ -521,23 +521,17 @@ function archiveList(listId) {
 
 // Check if a string is a valid URL
 function isValidURL(string) {
-    // Simple check if string starts with http:// or https://
-    if (string.startsWith('http://') || string.startsWith('https://')) {
+    // Require protocol or www, and a valid domain with TLD
+    const urlPattern = /^(https?:\/\/|www\.)[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/\S*)?$/;
+    if (urlPattern.test(string.trim())) {
         return true;
     }
-    
-    // More comprehensive validation using URL constructor
     try {
-        new URL(string);
-        return true;
+        const url = new URL(string);
+        // Must have protocol and a valid hostname with a dot
+        return !!url.protocol.match(/^https?:$/) && url.hostname.includes('.');
     } catch (_) {
-        // Try with added https://
-        try {
-            new URL('https://' + string);
-            return true;
-        } catch (_) {
-            return false;
-        }
+        return false;
     }
 }
 
@@ -921,7 +915,8 @@ function setupDragAndDrop(container, listId) {
             // Reorder items within the same list
             updateItemOrder(listId);
         }
-        e.classList.remove('edit-mode');
+        if (e.classList)
+            e.classList.remove('edit-mode');
     });
 }
 
