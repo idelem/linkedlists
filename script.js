@@ -424,11 +424,35 @@ function createNoteItemContent(item, itemElement, listId) {
     // Create title element
     const noteTitle = document.createElement('div');
     noteTitle.className = 'link-title note-title';
+
+    // Function to enter edit mode
+    function enterEditMode() {
+        itemElement.classList.add('edit-mode');
+        // linkAnchor.style.display = 'none';
+        // titleEditor.style.display = 'block';
+        itemElement.draggable = false;
+        e.stopPropagation();
+    }
+
+    // Function to exit edit mode
+    function exitEditMode() {
+        itemElement.classList.remove('edit-mode');
+        // linkAnchor.style.display = 'block';
+        // titleEditor.style.display = 'none';
+        itemElement.draggable = true;
+    }
     
     const titleEditor = document.createElement('div');
     titleEditor.className = 'title-editor';
     titleEditor.contentEditable = true;
     titleEditor.textContent = item.title;
+
+    titleEditor.addEventListener('click', () => {
+        if (titleEditor.textContent === 'New Note') {
+            titleEditor.textContent = '';
+        }
+        enterEditMode();
+    });
     
     // Save title when done editing
     titleEditor.addEventListener('blur', (e) => {
@@ -439,6 +463,7 @@ function createNoteItemContent(item, itemElement, listId) {
         } else {
             e.target.textContent = item.title;
         }
+        exitEditMode();
     });
     
     titleEditor.addEventListener('keydown', (e) => {
@@ -458,8 +483,9 @@ function createNoteItemContent(item, itemElement, listId) {
     
     noteContent.addEventListener('click', () => {
         if (noteContent.textContent === 'Add note content...') {
-        noteContent.textContent = '';
+            noteContent.textContent = '';
         }
+        enterEditMode();
     });
     
     noteContent.addEventListener('blur', (e) => {
@@ -471,6 +497,7 @@ function createNoteItemContent(item, itemElement, listId) {
             e.target.textContent = 'Add note content...';
         }
         saveData();
+        exitEditMode();
     });
     
     // Create delete button (same as for links)
