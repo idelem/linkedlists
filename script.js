@@ -140,6 +140,12 @@ function renderList(list) {
     
     const listActions = document.createElement('div');
     listActions.className = 'list-actions';
+
+    const addNoteButton = document.createElement('button');
+    addNoteButton.className = 'list-button add-note-button';
+    addNoteButton.innerHTML = '<i class="fas fa-sticky-note"></i>';
+    addNoteButton.title = 'Add Note';
+    addNoteButton.addEventListener('click', () => addNoteToList(list.id));
     
     const toggleButton = document.createElement('button');
     toggleButton.className = 'list-button toggle-button';
@@ -153,6 +159,7 @@ function renderList(list) {
     archiveButton.title = 'Archive List';
     archiveButton.addEventListener('click', () => archiveList(list.id));
     
+    listActions.appendChild(addNoteButton);
     listActions.appendChild(toggleButton);
     listActions.appendChild(archiveButton);
     
@@ -207,9 +214,22 @@ function createItemElement(item, listId) {
     itemElement.className = 'list-item draggable';
     itemElement.dataset.id = item.id;
     itemElement.draggable = true;
-    
-    // In the createItemElement function, modify the linkTitle section:
 
+    if (item.type === 'note') {
+        // Create note-specific elements
+        createNoteItemContent(item, itemElement, listId);
+    } else {
+        // Use existing link item creation logic
+        createLinkItemContent(item, itemElement, listId);
+    }
+    
+
+    
+    
+    return itemElement;
+}
+
+function createLinkItemContent(item, itemElement, listId) {
     const linkTitle = document.createElement('div');
     linkTitle.className = 'link-title';
 
@@ -398,8 +418,84 @@ function createItemElement(item, listId) {
     itemElement.addEventListener('dragend', () => {
         itemElement.classList.remove('dragging');
     });
+}
+
+function createNoteItemContent(item, itemElement, listId) {
+    // Create title element
+    const noteTitle = document.createElement('div');
+    noteTitle.className = 'link-title note-title';
     
-    return itemElement;
+    const titleEditor = document.createElement('div');
+    titleEditor.className = 'title-editor';
+    titleEditor.contentEditable = true;
+    titleEditor.textContent = item.title;
+    
+    // Save title when done editing
+    titleEditor.addEventListener('blur', (e) => {
+        const newTitle = e.target.textContent.trim();
+        if (newTitle) {
+        item.title = newTitle;
+        saveData();
+        } else {
+        e.target.textContent = item.title;
+        }
+    });
+    
+    titleEditor.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+        e.preventDefault();
+        e.target.blur();
+        }
+    });
+    
+    noteTitle.appendChild(titleEditor);
+    
+    // Create content element
+    const noteContent = document.createElement('div');
+    noteContent.className = 'link-description note-content';
+    noteContent.contentEditable = true;
+    noteContent.textContent = item.content || 'Add note content...';
+    
+    noteContent.addEventListener('click', () => {
+        if (noteContent.textContent === 'Add note content...') {
+        noteContent.textContent = '';
+        }
+    });
+    
+    noteContent.addEventListener('blur', (e) => {
+        const newContent = e.target.textContent.trim();
+        if (newContent && newContent !== 'Add note content...') {
+        item.content = newContent;
+        } else {
+        item.content = '';
+        e.target.textContent = 'Add note content...';
+        }
+        saveData();
+    });
+    
+    // Create delete button (same as for links)
+    const deleteButton = document.createElement('button');
+    let deleteMode = false;
+    deleteButton.className = 'delete-button';
+    deleteButton.innerHTML = '<i class="fas fa-times"></i>';
+    deleteButton.addEventListener('click', () => {
+        if (!deleteMode) {
+        deleteMode = true;
+        itemElement.classList.add('delete-mode');
+        }
+        else {
+        deleteItem(item.id, listId);
+        }
+    });
+    deleteButton.addEventListener('blur', () => {
+        deleteMode = false;
+        itemElement.classList.remove('delete-mode');
+    });
+    
+    // Append all elements
+    itemElement.appendChild(noteTitle);
+    itemElement.appendChild(noteContent);
+    itemElement.appendChild(deleteButton);
 }
 
 // Toggle list collapse state
